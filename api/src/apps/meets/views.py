@@ -6,7 +6,6 @@ from django.shortcuts import render
 from src.apps.custom_view import BaseView
 from src.apps.meets.forms import CreateMeetForm
 from src.domain.meet.dtos import MeetDTO
-from src.models.meets import Category
 
 
 class MeetsView(BaseView):
@@ -48,7 +47,7 @@ class CreateMeetView(BaseView):
     def post(self, request):
         form = CreateMeetForm(request.POST)
         if form.is_valid():
-            self.meet_service.create(MeetDTO(
+            err = self.meet_service.create(MeetDTO(
                 category_id=form.cleaned_data["category"].id,
                 title=form.cleaned_data["title"],
                 start_time=form.cleaned_data["start_time"],
@@ -56,6 +55,8 @@ class CreateMeetView(BaseView):
                 responsible_id=form.cleaned_data["responsible"].id,
                 participant_statuses=form.cleaned_data["participant_statuses"],
             ))
+            if err:
+                return JsonResponse({"status": "error", "message": str(err)}, status=400)
             return JsonResponse({"status": "success"}, status=201)
         return JsonResponse({"status": "error", "errors": form.errors}, status=400)
 
@@ -92,9 +93,6 @@ class EditMeetView(BaseView):
                 responsible_id=form.cleaned_data["responsible"].id,
                 participant_statuses=form.cleaned_data["participant_statuses"],
             ))
-
-            print(form.cleaned_data["participant_statuses"])
-
             return JsonResponse({"status": "success"}, status=201)
 
         return JsonResponse({"status": "error", "errors": form.errors}, status=400)
