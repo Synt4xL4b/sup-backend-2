@@ -73,39 +73,19 @@
                 <!-- Элементы после кнопки "Меню таблицы" смещены вправо -->
                 <div class="flex items-center ml-auto space-x-4">
                    <!-- Выпадающий список для количества строк -->
-                    <select id="rows-per-page" class="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 bg-green-custom text-white">
-                        <option value="8" {% if pagination.rows_per_page == 8 %}selected{% endif %}>8</option>
-                        <option value="16" {% if pagination.rows_per_page == 16 %}selected{% endif %}>16</option>
-                        <option value="24" {% if pagination.rows_per_page == 24 %}selected{% endif %}>24</option>
-                    </select>
+                    <form id="rows-per-page-form" method="get" class="flex items-center">
+                        <label for="rows-per-page" class="mr-2 text-green-custom">Строк на странице:</label>
+                        <select name="per_page" id="rows-per-page" class="p-2 border border-gray-300 rounded bg-green-custom text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="10" {% if request.GET.per_page == '10' %}selected{% endif %}>10</option>
+                            <option value="20" {% if request.GET.per_page == '20' %}selected{% endif %}>20</option>
+                            <option value="30" {% if request.GET.per_page == '30' %}selected{% endif %}>30</option>
+                            <option value="50" {% if request.GET.per_page|default:'50' == '50' %}selected{% endif %}>50</option>
+                            <option value="Все" {% if request.GET.per_page == 'Все' %}selected{% endif %}>Все</option>
+                        </select>
+                        <input type="hidden" name="page" value="{{ page.number }}">
+                    </form>
+                    {% include "pagination.html" with page=meets %}
 
-                    <!-- Пагинация -->
-                    <<div class="flex items-center space-x-2 pagination">
-                    <div id="pagination-data"
-                         data-current-page="{{ pagination.current_page }}"
-                         data-rows-per-page="{{ pagination.rows_per_page }}"
-                         data-total-pages="{{ pagination.total_pages }}"
-                         data-has-previous="{{ pagination.has_previous }}"
-                         data-has-next="{{ pagination.has_next }}">
-                    </div>
-
-                    <span class="text-green-custom">Пагинация</span>
-                    <button
-                        id="prev-page"
-                        class="bg-green-custom text-white border border-gray-300 p-2 rounded-l hover:bg-green-dark {% if not pagination.has_previous %}opacity-50 cursor-not-allowed{% endif %}"
-                        {% if not pagination.has_previous %}disabled{% endif %}
-                        data-page="{{ pagination.current_page|add:'-1' }}"
-                    >❮</button>
-                    <span id="page-info">
-                        Страница {{ pagination.current_page }} из {{ pagination.total_pages }}
-                    </span>
-                    <button
-                        id="next-page"
-                        class="bg-green-custom text-white border border-gray-300 p-2 rounded-r hover:bg-green-dark {% if not pagination.has_next %}opacity-50 cursor-not-allowed{% endif %}"
-                        {% if not pagination.has_next %}disabled{% endif %}
-                        data-page="{{ pagination.current_page|add:'1' }}"
-                    >❯</button>
-                </div>
                     <button id="open-modal" class="bg-green-custom text-white px-4 py-2 rounded hover:bg-green-dark">Создать Meet</button>
                 </div>
             </div>
@@ -120,7 +100,7 @@
                             <th class="border-b py-2">Ник Telegram</th>
                             <th class="border-b py-2">Имя Telegram</th>
                             {% for meet in meets %}
-                                <th data-category="{{ meet.category.pk }}" class="border-b py-2 font-semibold leading-3.5">
+                                <th data-category="{{ meet.category_id }}" class="border-b py-2 font-semibold leading-3.5">
                                     {{ meet.start_time|date:"d.m." }}<br>{{ meet.start_time|date:"Y" }}
                                 </th>
                             {% endfor %}
@@ -135,13 +115,14 @@
                                 <td class="border-b py-2 px-4">{{ user.tg_nickname }}</td>
                                 <td class="border-b py-2 px-4">{{ user.tg_name }}</td>
                                 {% for meet in meets %}
-                                    {% if user in meet.participants.all %}
-                                        <td data-category="{{ meet.category.pk }}" class="border-b py-2 px-4 text-center">
-                                            {% for user_meet in user.custom_meets.all %}
-                                                {% if user_meet.meet.id == meet.id %}
-                                                    {% if user_meet.status_color == 'red' %}
+                                      {% if user.id in meet.participant_statuses %}
+                                        <td data-category="{{ meet.category_id }}" class="border-b py-2 px-4 text-center">
+                                            {% for meet_id, status_color in user.meet_statuses.items %}
+                                                {% if meet_id == meet.id %}
+                                                    {{ user_meet }}
+                                                    {% if status_color == 'red' %}
                                                         <div class="w-6 h-6 mx-auto rounded-lg bg-red-400 border border-red-800"></div>
-                                                    {% elif user_meet.status_color == 'yellow' %}
+                                                    {% elif status_color == 'yellow' %}
                                                         <div class="w-6 h-6 mx-auto rounded-lg bg-yellow-200 border border-yellow-600"></div>
                                                     {% else %}
                                                         <div class="w-6 h-6 mx-auto rounded-lg bg-green-400 border border-gray-600"></div>
@@ -150,7 +131,7 @@
                                             {% endfor %}
                                         </td>
                                     {% else %}
-                                        <td data-category="{{ meet.category.pk }}" class="border-b py-2 px-4 text-center">
+                                        <td data-category="{{ meet.category_id }}" class="border-b py-2 px-4 text-center">
                                             <div class="w-6 h-6 mx-auto rounded-lg bg-gray-200 border border-gray-600"></div>
                                         </td>
                                     {% endif %}
@@ -173,7 +154,7 @@
                     </thead>
                     <tbody>
                     {% for meet in meets %}
-                    <tr data-category="{{ meet.category.id }}">
+                    <tr data-category="{{ meet.category_id }}">
                         <td class="border-b py-2 px-4 max-w-[50px]">{{ meet.id }}</td>
                         <td class="border-b py-2 px-4">{{ meet.title }}</td>
                         <td class="border-b py-2 px-4">{{ meet.start_time|date:"d.m.y" }}</td>
@@ -225,10 +206,7 @@
     <!--    <script src="{% static 'script/script.js' %}"></script>-->
 
     <script src="{% static 'script/meets.js' %}"></script>
-    {% block extra_js %}
     <script src="{% static 'script/pagination.js' %}"></script>
-    {% endblock %}
-
 {% endblock %}
 
 </body>

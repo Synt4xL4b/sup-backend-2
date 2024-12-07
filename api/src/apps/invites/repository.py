@@ -68,4 +68,8 @@ class InviteRepository(IInviteRepository, ABC):
     
     def chek_invitation_code_or_404(self, invitation_code):
         link = f'{os.getenv('FRONTEND_URL')}/registration/{invitation_code}'
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
         get_object_or_404(Invite, link=link, status='Активна')

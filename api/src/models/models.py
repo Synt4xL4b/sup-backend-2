@@ -37,6 +37,12 @@ class Team(models.Model):
         max_length=20,
         verbose_name="Команда",
         validators=[ModelValidator.validate_letters_space_only()],
+        unique=True,
+    )
+    participants = models.ManyToManyField(
+        to="CustomUser",
+        related_name="team_participants",
+        verbose_name="Участники",
     )
 
     class Meta:
@@ -125,7 +131,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name="github ник",
     )
     avatar = models.ImageField(
-        upload_to="avatars/", blank=True, null=True, verbose_name="аватар"
+        upload_to="images/avatars/",
+        blank=True,
+        null=True,
+        verbose_name="аватар",
     )
     role = models.ForeignKey(
         Role, on_delete=models.CASCADE, null=True, verbose_name="роль"

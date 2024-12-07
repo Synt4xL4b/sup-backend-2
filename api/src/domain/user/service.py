@@ -3,14 +3,12 @@ from src.domain.user.dtos import (
     CreateRoleDTO,
     PermissionDTO,
     RoleDTO,
-    TeamDTO,
     UserDTO,
 )
 from src.domain.user.entity import CreateUserEntity
 from src.domain.user.repository import (
     IPermissionRepository,
     IRoleRepository,
-    ITeamRepository,
     IUserRepository,
 )
 
@@ -69,7 +67,11 @@ class UserService:
         return self.__repository.get_user_list()
 
     def create(self, dto: CreateUserEntity):
+<<<<<<< HEAD
         # dto.password = dto.generate_password()
+=======
+        dto.password = self.generate_password()
+>>>>>>> develop
         self.__repository.create(dto)
 
     def update(self, user_id: int, dto: UserDTO):
@@ -83,9 +85,13 @@ class UserService:
         user.set_password(new_password)
         user.save()
 
-    # def generate_password(self) -> str:
+<<<<<<< HEAD
+    def generate_password(self) -> str:
     #     return secrets.choice(string.ascii_letters + string.digits)
+        return 'sasasa'
 
+=======
+>>>>>>> 36414a7aebdc008e6730b0ba5d3f08280c5a9be3
     def create_user_with_generated_password(self, dto: UserDTO):
         password = self.generate_password()
         user = self.__repository.create(dto)
@@ -94,12 +100,6 @@ class UserService:
         return user
 
     def set_password_registration(self, user_email, password1, password2):
-        self.__repository.set_password_registration(user_email, password1, password2)
-
-        
-class TeamService:
-    def __init__(self, repository: ITeamRepository):
-        self.__repository = repository
-
-    def get_team_list(self) -> list[TeamDTO]:
-        return self.__repository.get_team_list()
+        self.__repository.set_password_registration(
+            user_email, password1, password2
+        )

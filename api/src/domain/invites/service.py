@@ -1,7 +1,7 @@
 from src.domain.invites.dtos import InviteDTO
 from src.domain.invites.entity import InviteEntity
 from src.domain.invites.repository import IInviteRepository
-
+import os
 
 class InviteService:
     def __init__(self, repository: IInviteRepository):
@@ -19,7 +19,7 @@ class InviteService:
     def delete(self, pk):
         self.__repository.delete(pk)
 
-    def update_status(self, dto: InviteDTO, status: str = "EXPIRED"):
+    def update_status(self, dto: InviteDTO, status: str = 'EXPIRED'):
         invite = InviteEntity(
             pk=dto.pk,
             link=dto.link,
@@ -34,9 +34,17 @@ class InviteService:
         else:
             return "Invalid status"
         self.__repository.update_status(invite.pk, status)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> develop
     def create_inviteDTO(self, invitation_code):
         return self.__repository.create_inviteDTO(invitation_code)
     
     def chek_invitation_code_or_404(self, invitation_code):
+<<<<<<< HEAD
         return self.__repository.chek_invitation_code_or_404(invitation_code)
+=======
+        return self.__repository.chek_invitation_code_or_404(invitation_code)
+>>>>>>> develop
