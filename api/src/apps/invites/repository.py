@@ -54,3 +54,18 @@ class InviteRepository(IInviteRepository, ABC):
         invite = get_object_or_404(Invite, pk=invite_id)
         invite.status = status
         invite.save()
+
+    def create_inviteDTO(self, invitation_code):
+        link = f'{os.getenv('FRONTEND_URL')}/registration/{invitation_code}'
+        objects_invite = self.model.objects.get(link=link)
+        return InviteDTO(
+            pk=objects_invite.pk,
+            link=objects_invite.link,
+            status=objects_invite.status,
+            created_at=objects_invite.created_at,
+            expires_at=objects_invite.expires_at,
+        )
+    
+    def chek_invitation_code_or_404(self, invitation_code):
+        link = f'{os.getenv('FRONTEND_URL')}/registration/{invitation_code}'
+        get_object_or_404(Invite, link=link, status='Активна')

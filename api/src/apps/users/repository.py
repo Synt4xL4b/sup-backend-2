@@ -158,11 +158,10 @@ class UserRepository(IUserRepository, ABC):
             github_nickname=dto.github_nickname,
             avatar=dto.avatar,
             role_id=dto.role_id,
-            permissions=dto.permission_id,
+            # permissions=dto.permissions_ids,
             is_active=dto.is_active,
             is_admin=dto.is_admin,
             is_superuser=dto.is_superuser,
-            is_staff=dto.is_staff,
         )
         model.save()
         return self._user_orm_to_dto(model)

@@ -34,3 +34,9 @@ class InviteService:
         else:
             return "Invalid status"
         self.__repository.update_status(invite.pk, status)
+
+    def create_inviteDTO(self, invitation_code):
+        return self.__repository.create_inviteDTO(invitation_code)
+    
+    def chek_invitation_code_or_404(self, invitation_code):
+        return self.__repository.chek_invitation_code_or_404(invitation_code)
