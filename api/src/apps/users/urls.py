@@ -16,7 +16,7 @@ from src.apps.users.views import (
 app_name = "apps.users"
 
 urlpatterns = [
-    path("registration/", UserRegistration.as_view(), name="registration"),
+    path("registration/<invitation_code>/", UserRegistration.as_view(), name="registration"),
     path("users/create/", UserCreateView.as_view(), name="create_user"),
     path("", UserListView.as_view(), name="users"),
     path("create/", UserCreateView.as_view(), name="create_user"),

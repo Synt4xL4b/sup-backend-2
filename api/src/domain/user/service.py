@@ -69,7 +69,7 @@ class UserService:
         return self.__repository.get_user_list()
 
     def create(self, dto: CreateUserEntity):
-        dto.password = dto.generate_password()
+        dto.password = self.generate_password()
         self.__repository.create(dto)
 
     def update(self, user_id: int, dto: UserDTO):
@@ -83,8 +83,9 @@ class UserService:
         user.set_password(new_password)
         user.save()
 
-    # def generate_password(self) -> str:
+    def generate_password(self) -> str:
     #     return secrets.choice(string.ascii_letters + string.digits)
+        return 'sasasa'
 
     def create_user_with_generated_password(self, dto: UserDTO):
         password = self.generate_password()

@@ -1,4 +1,6 @@
+from datetime import datetime
 import re
+import os
 
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
@@ -18,7 +20,13 @@ from src.domain.user.dtos import (
     RoleDTO,
     UserDTO,
 )
+from src.domain.invites.dtos import InviteDTO
+
+
 from src.domain.user.entity import CreateUserEntity
+from src.models.invites import Invite
+from django.shortcuts import get_object_or_404
+
 
 
 class RoleListView(BaseView):
@@ -341,19 +349,22 @@ class UserPasswordChangeView(BaseView):
 class UserRegistration(BaseView):
     """Регистрация пользователя"""
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, invitation_code):
         form = RegistrationForm()
+        self.invite_service.chek_invitation_code_or_404(invitation_code)
         return render(
             request,
             "reg.html",
             {"form": form},
         )
 
-    def post(self, request):
+    def post(self, request, invitation_code):
+        self.invite_service.chek_invitation_code_or_404(invitation_code)
         form = RegistrationForm(request.POST)
         if form.is_valid():
             try:
                 user_dto = UserDTO(
+                    # id=100,
                     name=form.cleaned_data["name"],
                     surname=form.cleaned_data["surname"],
                     email=form.cleaned_data["email"],
@@ -363,12 +374,14 @@ class UserRegistration(BaseView):
                     gitlab_nickname=form.cleaned_data["gitlab_nickname"],
                     github_nickname=form.cleaned_data["github_nickname"],
                     role_id=None,
-                    permission_id=None,
+                    permissions_ids=[],
                     is_active=None,
                     is_admin=False,
                     is_superuser=False,
-                    is_staff=False,
+                    meet_statuses=False,
                     avatar=None,
+                    team_id = None,
+                    date_joined = None
                 )
                 self.user_service.create(user_dto)
                 self.user_service.set_password_registration(
@@ -376,6 +389,8 @@ class UserRegistration(BaseView):
                     form.cleaned_data["password1"],
                     form.cleaned_data["password2"],
                 )
+                invite_DTO = self.invite_service.create_inviteDTO(invitation_code)
+                self.invite_service.update_status(invite_DTO, status = 'USED')
                 return JsonResponse({"status": "success"}, status=201)
             except IntegrityError as err:
                 matches = re.findall(r"\((.*?)\)", str(err))

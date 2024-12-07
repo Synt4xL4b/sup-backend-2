@@ -120,7 +120,7 @@ class UserRepository(IUserRepository, ABC):
 
     def _user_orm_to_dto(self, user: CustomUser) -> UserDTO:
         return UserDTO(
-            id=user.id,
+            # id=user.id,
             name=user.name,
             surname=user.surname,
             email=user.email,
