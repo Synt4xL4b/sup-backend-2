@@ -79,16 +79,16 @@ class IFeaturesRepository(abc.ABC):
 
 
 class ITaskRepository(abc.ABC):
-    @abc.abstractmethod
-    def get_tasks_list(self) -> list:
-        raise NotImplementedError
+    # @abc.abstractmethod
+    # def get_tasks_list(self) -> list:
+    #     raise NotImplementedError
 
     @abc.abstractmethod
     def create_task(self, dto: CreateTaskDTO):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_task_by_id(self, task_id: int) -> FeaturesDTO:
+    def get_by_id(self, pk: int) -> FeaturesDTO:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -103,6 +103,11 @@ class ITaskRepository(abc.ABC):
     def get_task_status_choices(self) -> list:
         raise NotImplementedError
 
+    # @abc.abstractmethod
+    # def get_tags_list(self, task_id: int) -> list[TagDTO]:
+    #     raise NotImplementedError
+    
+class ITagsRepository(abc.ABC):
     @abc.abstractmethod
     def get_tags_list(self, task_id: int) -> list[TagDTO]:
         raise NotImplementedError

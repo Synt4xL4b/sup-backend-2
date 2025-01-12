@@ -15,15 +15,13 @@ class TasksView(BaseView):
     """
 
     def get(self, *args, **kwargs):
-        tasks = self.task_service.get_tasks_list()
+        tasks = self.task_service.get_list()
         tasks = self.paginate_queryset(tasks)
         task_status_choices = self.task_service.get_task_status_choices()
         features = self.features_service.get_features_list()
         tags = self.features_service.get_features_tags_list()
-
         context = {
             "tasks": tasks,
-            "users": self.user_service.get_user_list(),
             "task_status_choices": task_status_choices,
             "features": features,
             "tags": tags,
@@ -37,12 +35,12 @@ class TaskDetailView(BaseView):
     """
     def get(self, request, *args, **kwargs):
         task_id = kwargs.get("task_id")
-        task = self.task_service.get_task_by_id(task_id=task_id)
-        tags = self.task_service.get_tags_list(task_id=task_id)
+        task = self.task_service.get_by_id(pk=task_id)
+        tags = self.tags_service.get_tags_list(task_id=task_id)
         comments = self.task_service.get_comments_list(task_id=task_id)
         feature = self.features_service.get_feature_id(task.feature_id)
-        contributor = self.user_service.get_user_by_id(user_id=task.contributor_id)
-        responsible = self.user_service.get_user_by_id(user_id=task.responsible_id)
+        contributor = self.user_service.get_by_id(pk=task.contributor_id)
+        responsible = self.user_service.get_by_id(pk=task.responsible_id)
         task_url = reverse('projects:tasks')
         return render(
             request,
@@ -64,7 +62,7 @@ class TaskDetailView(BaseView):
         if form.is_valid():
             comment_dto = CommentDTO(
                 user_id=request.user.id,
-                task_id=self.task_service.get_task_by_id(task_id=kwargs.get("task_id")).id,
+                task_id=self.task_service.get_by_id(pk=kwargs.get("task_id")).id,
                 comment=form.cleaned_data["comment"],
                 )
             try:
@@ -85,13 +83,15 @@ class CreateTaskView(BaseView):
         form = TaskForm(request.POST, request.FILES)
 
         task_status_choices = self.task_service.get_task_status_choices()
+        users = self.user_service.get_list()
+        print(users)
 
         return render(
             request,
             "create_task_modal.html",
             {
                 "form": form,
-                "users": self.user_service.get_user_list(),
+                "users": users,
                 "task_status_choices": task_status_choices,
             },
         )

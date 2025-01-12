@@ -10,6 +10,7 @@ from src.apps.projects.repository import (
     FeaturesRepository,
     ProjectRepository,
     TaskRepository,
+    TagsRepository,
 )
 from src.apps.registration.repository import RegistarionRepository
 from src.apps.teams.repository import TeamRepository
@@ -25,6 +26,7 @@ from src.domain.project.service import (
     FeatureService,
     ProjectService,
     TaskService,
+    TagsService,
 )
 from src.domain.registration.service import RegistrationService
 from src.domain.teams import TeamService
@@ -58,6 +60,7 @@ class BaseView:
     registration_service = RegistrationService(RegistarionRepository())
     verifyemail_service = VerifyemailService(VerifyemailRepository())
     task_service = TaskService(TaskRepository())
+    tags_service = TagsService(TagsRepository())
 
     # Разрешенные методы
     http_method_names = ["get", "post", "put", "patch", "delete"]

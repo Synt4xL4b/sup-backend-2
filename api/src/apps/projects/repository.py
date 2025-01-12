@@ -16,6 +16,7 @@ from src.domain.project.repository import (
     IFeaturesRepository,
     IProjectRepository,
     ITaskRepository,
+    ITagsRepository,
 )
 from src.models.projects import (
     Features,
@@ -278,10 +279,10 @@ class TaskRepository(ITaskRepository, ABC):
             feature_id=task.feature_id,
         )
 
-    def get_tasks_list(self) -> TaskDTO:
+    def get_list(self) -> TaskDTO:
         return Task.objects.all().order_by("id")
 
-    def get_task_by_id(self, task_id: int) -> TaskDTO:
+    def get_by_id(self, task_id: int) -> TaskDTO:
         return self._task_orm_to_dto(Task.objects.get(id=task_id))
 
     def create_task(self, dto: CreateTaskDTO):
@@ -318,16 +319,16 @@ class TaskRepository(ITaskRepository, ABC):
     def get_task_status_choices(self):
         return TaskChoicesObject.choices()
 
-    def get_tags_list(self, task_id: int) -> list[TagDTO]:
-        task = Task.objects.get(id=task_id)
-        tags = task.tags.all()
-        return [
-            TagDTO(id=tag.id, name=tag.name, color=tag.color) for tag in tags
-        ]
+    # def get_tags_list(self, task_id: int) -> list[TagDTO]:
+    #     task = Task.objects.get(id=task_id)
+    #     tags = task.tags.all()
+    #     return [
+    #         TagDTO(id=tag.id, name=tag.name, color=tag.color) for tag in tags
+    #     ]
     
-    def get_tags_id_list(self, tags_id: int):
-        tags = Tags.objects.filter(id__in=tags_id)
-        return tags
+    # def get_tags_id_list(self, tags_id: int):
+    #     tags = Tags.objects.filter(id__in=tags_id)
+    #     return tags
     
     def get_task_id_list(self, feature: int):
         feature_instance = Features.objects.get(name=feature.name)
@@ -346,3 +347,19 @@ class TaskRepository(ITaskRepository, ABC):
         task = Task.objects.get(id=task_id)
         comments = Comment.objects.filter(task=task)
         return comments
+
+
+class TagsRepository(ITagsRepository, ABC):
+
+    model = Tags
+
+    def get_tags_id_list(self, tags_list_id: list):
+        tags = self.model.objects.filter(id__in=tags_list_id)
+        return tags
+
+    def get_tags_list(self, task_id: int) -> list[TagDTO]:
+        task = Task.objects.get(id=task_id)
+        tags = task.tags.all()
+        return [
+            TagDTO(id=tag.id, name=tag.name, color=tag.color) for tag in tags
+        ]
