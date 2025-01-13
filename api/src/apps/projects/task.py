@@ -20,11 +20,13 @@ class TasksView(BaseView):
         task_status_choices = self.task_service.get_task_status_choices()
         features = self.features_service.get_features_list()
         tags = self.features_service.get_features_tags_list()
+        users = User.objects.order_by("id")
         context = {
             "tasks": tasks,
             "task_status_choices": task_status_choices,
             "features": features,
             "tags": tags,
+            "users": users,
         }
         return render(self.request, "tasks_list.html", context)
 
@@ -83,15 +85,13 @@ class CreateTaskView(BaseView):
         form = TaskForm(request.POST, request.FILES)
 
         task_status_choices = self.task_service.get_task_status_choices()
-        users = self.user_service.get_list()
-        print(users)
 
         return render(
             request,
             "create_task_modal.html",
             {
                 "form": form,
-                "users": users,
+                # "users": users,
                 "task_status_choices": task_status_choices,
             },
         )
