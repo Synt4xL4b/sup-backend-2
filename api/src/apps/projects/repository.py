@@ -1,44 +1,40 @@
 from abc import ABC
 
 from django.db.models import Q
-from src.domain.project.dtos import (
+from src.domain.project import (
+    CommentDTO,
     CreateTaskDTO,
     FeaturesChoicesObject,
     FeaturesDTO,
+    IFeaturesRepository,
+    IProjectRepository,
+    ITaskRepository,
     ProjectDTO,
     StatusObject,
     TagDTO,
     TaskChoicesObject,
     TaskDTO,
-    CommentDTO,
-)
-from src.domain.project.repository import (
-    IFeaturesRepository,
-    IProjectRepository,
-    ITaskRepository,
     ITagsRepository,
 )
-from src.models.projects import (
-    Features,
-    Project,
-    Tags,
-    Task,
-    Comment
-)
 from src.models.models import CustomUser
+from src.models.projects import Comment, Features, Project, Tags, Task
 
 
 class ProjectRepository(IProjectRepository, ABC):
 
     model = Project
 
-    def get_project_list(self) -> list[ProjectDTO]:
+    @classmethod
+    def exists(cls, pk: int) -> bool:
+        return cls.model.objects.filter(id=pk).exists()
+
+    def get_list(self) -> list[ProjectDTO]:
         return list(Project.objects.all().order_by("id"))
 
     def get_project_by_slug(self, slug: str) -> ProjectDTO:
         return Project.objects.get(slug=slug)
 
-    def get_project_by_id(self, project_id: int) -> ProjectDTO:
+    def get_by_id(self, project_id: int) -> ProjectDTO:
         return Project.objects.get(id=project_id)
 
     def update_project(self, project_id: int, dto: ProjectDTO) -> ProjectDTO:
@@ -90,7 +86,7 @@ class ProjectRepository(IProjectRepository, ABC):
             date_created=project.date_created,
         )
 
-    def delete_project(self, project_id: int):
+    def delete(self, project_id: int):
         project = Project.objects.get(id=project_id)
         project.delete()
 
@@ -128,7 +124,11 @@ class FeaturesRepository(IFeaturesRepository, ABC):
 
     model = Features
 
-    def get_features_list(self) -> FeaturesDTO:
+    @classmethod
+    def exists(cls, pk: int) -> bool:
+        return cls.model.objects.filter(id=pk).exists()
+
+    def get_list(self) -> FeaturesDTO:
         return Features.objects.all().order_by("id")
 
     def get_features_tags_list(self) -> list:
@@ -169,9 +169,9 @@ class FeaturesRepository(IFeaturesRepository, ABC):
             status=feature.status,
         )
 
-    def get_feature_by_id(self, feature_id: int) -> FeaturesDTO:
+    def get_by_id(self, feature_id: int) -> FeaturesDTO:
         feature = Features.objects.get(id=feature_id)  # может быть исключение
-        return FeaturesDTO(
+        feature_dto = FeaturesDTO(
             name=feature.name,
             importance=feature.importance,
             description=feature.description,
@@ -185,10 +185,12 @@ class FeaturesRepository(IFeaturesRepository, ABC):
             project_id=feature.project_id,
             status=feature.status,
         )
-    
-    def get_feature_id(self, feature_id: int) -> Features:
-        feature = Features.objects.get(id=feature_id)  # может быть исключение
-        return feature
+        feature_dto.id = feature.id
+        return feature_dto
+
+    # def get_feature_id(self, feature_id: int) -> Features:
+    #     feature = Features.objects.get(id=feature_id)  # может быть исключение
+    #     return feature
 
     def update_features(
         self, feature_id: int, dto: FeaturesDTO
@@ -225,7 +227,7 @@ class FeaturesRepository(IFeaturesRepository, ABC):
             status=feature.status,
         )
 
-    def delete_features(self, feature_id: int):
+    def delete(self, feature_id: int):
         feature = Features.objects.get(id=feature_id)
         feature.delete()
 
@@ -260,6 +262,10 @@ class FeaturesRepository(IFeaturesRepository, ABC):
 class TaskRepository(ITaskRepository, ABC):
 
     model = Task
+
+    @classmethod
+    def exists(cls, pk: int) -> bool:
+        return cls.model.objects.filter(id=pk).exists()
 
     @classmethod
     def _task_orm_to_dto(cls, task: Task) -> TaskDTO:
@@ -312,7 +318,7 @@ class TaskRepository(ITaskRepository, ABC):
         task.save()
         task.tags.set(dto.tags)
 
-    def delete_task(self, task_id: int):
+    def delete(self, task_id: int):
         task = Task.objects.get(id=task_id)
         task.delete()
 
@@ -334,7 +340,7 @@ class TaskRepository(ITaskRepository, ABC):
         feature_instance = Features.objects.get(name=feature.name)
         task = feature_instance.tasks_features.all()
         return task
-    
+
     def create_comment(self, dto: CommentDTO):
         comment = Comment(
             user=CustomUser.objects.get(id=dto.user_id),
@@ -353,6 +359,10 @@ class TagsRepository(ITagsRepository, ABC):
 
     model = Tags
 
+    @classmethod
+    def exists(cls, pk: int) -> bool:
+        return cls.model.objects.filter(id=pk).exists()
+
     def get_tags_id_list(self, tags_list_id: list):
         tags = self.model.objects.filter(id__in=tags_list_id)
         return tags
@@ -363,3 +373,14 @@ class TagsRepository(ITagsRepository, ABC):
         return [
             TagDTO(id=tag.id, name=tag.name, color=tag.color) for tag in tags
         ]
+    
+    def delete(self, tags_id: int):
+        task = self.model.objects.get(id=tags_id)
+        task.delete()
+
+    def get_list(self) -> TaskDTO:
+        return self.model.objects.all().order_by("id")
+
+    def get_by_id(self, tags_id: int) -> TaskDTO:
+        # return self._task_orm_to_dto(Task.objects.get(id=tags_id))
+        pass

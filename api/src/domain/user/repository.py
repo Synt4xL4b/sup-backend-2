@@ -53,3 +53,4 @@ class IUserRepository(BaseRepository):
     @abstractmethod
     def send_welcome_email(self, user_dto):
         raise NotImplementedError
+    
