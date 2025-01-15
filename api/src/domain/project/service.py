@@ -96,29 +96,14 @@ class TaskService(BaseService):
     def __init__(self, repository: ITaskRepository):
         self._repository = repository
 
-    # def get_tasks_list(self):
-    #     return self.__task_repository.get_tasks_list()
-
-    # def get_task_by_id(self, task_id: int):
-    #     return self._repository.get_task_by_id(task_id)
-
     def create_task(self, dto: CreateTaskDTO):
         return self._repository.create_task(dto)
 
     def update_task(self, dto: TaskDTO):
         return self._repository.update_task(dto)
 
-    # def delete_task(self, task_id: int):
-    #     return self._repository.delete_task(task_id)
-
     def get_task_status_choices(self):
         return self._repository.get_task_status_choices()
-
-    # def get_tags_list(self, task_id: int):
-    #     return self._repository.get_tags_list(task_id)
-    
-    # def get_tags_id_list(self, tags_id: int):
-    #     return self._repository.get_tags_id_list(tags_id)
     
     def get_task_id_list(self, feature: int):
         return self._repository.get_task_id_list(feature)

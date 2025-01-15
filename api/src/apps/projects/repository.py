@@ -188,10 +188,6 @@ class FeaturesRepository(IFeaturesRepository, ABC):
         feature_dto.id = feature.id
         return feature_dto
 
-    # def get_feature_id(self, feature_id: int) -> Features:
-    #     feature = Features.objects.get(id=feature_id)  # может быть исключение
-    #     return feature
-
     def update_features(
         self, feature_id: int, dto: FeaturesDTO
     ) -> FeaturesDTO:
@@ -286,7 +282,7 @@ class TaskRepository(ITaskRepository, ABC):
         )
 
     def get_list(self) -> TaskDTO:
-        return Task.objects.all().order_by("id")
+        return self.model.objects.all().order_by("id")
 
     def get_by_id(self, task_id: int) -> TaskDTO:
         return self._task_orm_to_dto(Task.objects.get(id=task_id))
@@ -306,7 +302,7 @@ class TaskRepository(ITaskRepository, ABC):
         task.tags.set(dto.tags)
 
     def update_task(self, dto: TaskDTO) -> TaskDTO:
-        task = Task.objects.get(id=dto.id)
+        task = self.model.objects.get(id=dto.id)
 
         task.name = dto.name
         task.priority = dto.priority
@@ -319,22 +315,11 @@ class TaskRepository(ITaskRepository, ABC):
         task.tags.set(dto.tags)
 
     def delete(self, task_id: int):
-        task = Task.objects.get(id=task_id)
+        task = self.model.objects.get(id=task_id)
         task.delete()
 
     def get_task_status_choices(self):
         return TaskChoicesObject.choices()
-
-    # def get_tags_list(self, task_id: int) -> list[TagDTO]:
-    #     task = Task.objects.get(id=task_id)
-    #     tags = task.tags.all()
-    #     return [
-    #         TagDTO(id=tag.id, name=tag.name, color=tag.color) for tag in tags
-    #     ]
-    
-    # def get_tags_id_list(self, tags_id: int):
-    #     tags = Tags.objects.filter(id__in=tags_id)
-    #     return tags
     
     def get_task_id_list(self, feature: int):
         feature_instance = Features.objects.get(name=feature.name)
@@ -345,12 +330,12 @@ class TaskRepository(ITaskRepository, ABC):
         comment = Comment(
             user=CustomUser.objects.get(id=dto.user_id),
             comment=dto.comment,
-            task=Task.objects.get(id=dto.task_id),
+            task=self.model.objects.get(id=dto.task_id),
         )
         comment.save()
 
     def get_comments_list(self, task_id):
-        task = Task.objects.get(id=task_id)
+        task = self.model.objects.get(id=task_id)
         comments = Comment.objects.filter(task=task)
         return comments
 
