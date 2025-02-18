@@ -49,6 +49,7 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         ("Avatar", {"fields": ("avatar",)}),
+        ("permissions", {"fields": ("permissions",)}),
         (
             "Role and Status",
             {

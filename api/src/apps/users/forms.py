@@ -136,7 +136,6 @@ class PasswordChangeForm(forms.Form):
             raise forms.ValidationError(
                 "Новый пароль должен отличаться от старого"
             )
-
         return new_password2
 
     def save(self, commit=True):
